@@ -1,6 +1,6 @@
 # clue/reactphp-sqlite
 
-[![CI status](https://github.com/clue/reactphp-sqlite/workflows/CI/badge.svg)](https://github.com/clue/reactphp-sqlite/actions)
+[![CI status](https://github.com/clue/reactphp-sqlite/actions/workflows/ci.yml/badge.svg)](https://github.com/clue/reactphp-sqlite/actions)
 [![installs on Packagist](https://img.shields.io/packagist/dt/clue/reactphp-sqlite?color=blue&label=installs%20on%20Packagist)](https://packagist.org/packages/clue/reactphp-sqlite)
 
 Async SQLite database, lightweight non-blocking process wrapper around file-based database extension (`ext-sqlite3`),
@@ -438,7 +438,7 @@ This project follows [SemVer](https://semver.org/).
 This will install the latest supported version:
 
 ```bash
-$ composer require clue/reactphp-sqlite:^1.5
+composer require clue/reactphp-sqlite:^1.5
 ```
 
 See also the [CHANGELOG](CHANGELOG.md) for details about version upgrades.
@@ -452,7 +452,7 @@ PHP extension, so you'll have to make sure that you have a suitable version
 installed. On Debian/Ubuntu-based systems, you may simply install it like this:
 
 ```bash
-$ sudo apt install php-sqlite3
+sudo apt install php-sqlite3
 ```
 
 ## Tests
@@ -461,13 +461,13 @@ To run the test suite, you first need to clone this repo and then install all
 dependencies [through Composer](https://getcomposer.org/):
 
 ```bash
-$ composer install
+composer install
 ```
 
 To run the test suite, go to the project root and run:
 
 ```bash
-$ vendor/bin/phpunit
+vendor/bin/phpunit
 ```
 
 ## License

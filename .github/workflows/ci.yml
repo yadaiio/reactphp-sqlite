@@ -26,12 +26,13 @@ jobs:
           - 5.5
           - 5.4
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: sqlite3
           coverage: xdebug
+          ini-file: development
       - run: composer install
       - run: vendor/bin/phpunit --coverage-text
         if: ${{ matrix.php >= 7.3 }}
