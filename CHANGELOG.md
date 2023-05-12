@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.6.0 (2023-05-12)
+
+*   Feature: Forward compatibility with upcoming Promise v3.
+    (#63 by @clue)
+
+*   Feature: Full PHP 8.2+ compatibility.
+    (#64 by @clue and #62 by @SimonFrings)
+
+*   Improve test suite, ensure 100% code coverage and report failed assertions.
+    (#65 and #66 by @clue)
+
 ## 1.5.0 (2022-02-15)
 
 *   Feature: Improve PHAR support, support spawning worker process from PHARs without file extension.
