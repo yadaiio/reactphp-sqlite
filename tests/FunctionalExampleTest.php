@@ -26,7 +26,7 @@ class FunctionalExampleTest extends TestCase
             $this->markTestSkipped('Unable to execute "php-cgi"');
         }
 
-        $output = $this->execExample('php-cgi query.php');
+        $output = $this->execExample('php-cgi -dopcache.jit=off query.php');
 
         $this->assertStringEndsWith("\n\n" . 'value' . "\n" . '42' . "\n", $output);
     }
@@ -55,7 +55,7 @@ class FunctionalExampleTest extends TestCase
             $this->markTestSkipped('Unable to execute "php-cgi" or "php"');
         }
 
-        $output = $this->execExample('php-cgi -dopen_basedir=' . escapeshellarg(dirname(__DIR__)) . ' query.php');
+        $output = $this->execExample('php-cgi -dopcache.jit=off -dopen_basedir=' . escapeshellarg(dirname(__DIR__)) . ' query.php');
 
         $this->assertStringEndsWith("\n\n" . 'value' . "\n" . '42' . "\n", $output);
     }

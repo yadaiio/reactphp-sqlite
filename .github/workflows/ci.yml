@@ -25,6 +25,9 @@ jobs:
           - 5.6
           - 5.5
           - 5.4
+        exclude: # ignore flaky results for legacy PHP on Windows
+          - os: windows-2022
+            php: 5.4
     steps:
       - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@v2
@@ -34,10 +37,17 @@ jobs:
           coverage: xdebug
           ini-file: development
       - run: composer install
-      - run: vendor/bin/phpunit --coverage-text
+      - run: vendor/bin/phpunit --coverage-text --coverage-clover=clover.xml
         if: ${{ matrix.php >= 7.3 }}
-      - run: vendor/bin/phpunit --coverage-text -c phpunit.xml.legacy
+      - run: vendor/bin/phpunit --coverage-text --coverage-clover=clover.xml -c phpunit.xml.legacy
         if: ${{ matrix.php < 7.3 }}
+      - name: Check 100% code coverage
+        if: ${{ matrix.os != 'windows-2022' }}
+        shell: php {0}
+        run: |
+          <?php
+          $metrics = simplexml_load_file('clover.xml')->project->metrics;
+          exit((int) $metrics['statements'] === (int) $metrics['coveredstatements'] ? 0 : 1);
       - run: cd tests/install-as-dep && composer install && php query.php
       - run: cd tests/install-as-dep && php -d phar.readonly=0 vendor/bin/phar-composer build . query.phar && php query.phar
       - run: cd tests/install-as-dep && mv query.phar query.ext && php query.ext

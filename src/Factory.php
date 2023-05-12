@@ -128,8 +128,9 @@ class Factory
                 return \React\Promise\resolve(new BlockingDatabase($filename, $flags));
             } catch (\Exception $e) {
                 return \React\Promise\reject(new \RuntimeException($e->getMessage()) );
-            } catch (\Error $e) {
-                return \React\Promise\reject(new \RuntimeException($e->getMessage()));
+            } catch (\Error $e) { // @codeCoverageIgnore
+                assert(\PHP_VERSION_ID >= 70000); // @codeCoverageIgnore
+                return \React\Promise\reject(new \RuntimeException($e->getMessage())); // @codeCoverageIgnore
             }
         }
 
@@ -229,12 +230,15 @@ class Factory
         $cwd = null;
         $worker = \dirname(__DIR__) . '/res/sqlite-worker.php';
 
+        // launch worker process directly or inside Phar by mapping relative paths (covered by functional test suite)
+        // @codeCoverageIgnoreStart
         if (\class_exists('Phar', false) && ($phar = \Phar::running(false)) !== '') {
-            $worker = '-r' . 'Phar::loadPhar(' . var_export($phar, true) . ');require(' . \var_export($worker, true) . ');'; // @codeCoverageIgnore
+            $worker = '-r' . 'Phar::loadPhar(' . var_export($phar, true) . ');require(' . \var_export($worker, true) . ');';
         } else {
             $cwd = __DIR__ . '/../res';
             $worker = \basename($worker);
         }
+        // @codeCoverageIgnoreEnd
         $command = 'exec ' . \escapeshellarg($this->bin) . ' ' . escapeshellarg($worker);
 
         // Try to get list of all open FDs (Linux/Mac and others)
@@ -297,12 +301,15 @@ class Factory
         $cwd = null;
         $worker = \dirname(__DIR__) . '/res/sqlite-worker.php';
 
+        // launch worker process directly or inside Phar by mapping relative paths (covered by functional test suite)
+        // @codeCoverageIgnoreStart
         if (\class_exists('Phar', false) && ($phar = \Phar::running(false)) !== '') {
-            $worker = '-r' . 'Phar::loadPhar(' . var_export($phar, true) . ');require(' . \var_export($worker, true) . ');'; // @codeCoverageIgnore
+            $worker = '-r' . 'Phar::loadPhar(' . var_export($phar, true) . ');require(' . \var_export($worker, true) . ');';
         } else {
             $cwd = __DIR__ . '/../res';
             $worker = \basename($worker);
         }
+        // @codeCoverageIgnoreEnd
         $command = \escapeshellarg($this->bin) . ' ' . escapeshellarg($worker);
 
         // launch process without default STDIO pipes, but inherit STDERR
@@ -316,9 +323,12 @@ class Factory
         // start temporary socket on random address
         $server = @stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
         if ($server === false) {
+            // report error if temporary socket server can not be started (unlikely)
+            // @codeCoverageIgnoreStart
             return \React\Promise\reject(
                 new \RuntimeException('Unable to start temporary socket I/O server: ' . $errstr, $errno)
             );
+            // @codeCoverageIgnoreEnd
         }
 
         // pass random server address to child process to connect back to parent process
@@ -342,7 +352,7 @@ class Factory
             fclose($server);
             $process->terminate();
 
-            $deferred->reject(new \RuntimeException('No connection detected'));
+            $deferred->reject(new \RuntimeException('Opening database socket timed out'));
         });
 
         $process->on('exit', function () use ($deferred, $server, $timeout) {
