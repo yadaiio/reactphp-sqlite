@@ -797,6 +797,56 @@ class FunctionalDatabaseTest extends TestCase
         $this->assertSame([], $data->rows);
     }
 
+    public function testCancelOpenWithSocketRejectsPromise()
+    {
+        $factory = new Factory();
+
+        $ref = new \ReflectionProperty($factory, 'useSocket');
+        $ref->setAccessible(true);
+        $ref->setValue($factory, true);
+
+        $promise = $factory->open(':memory:');
+        $promise->cancel();
+
+        $exception = null;
+        $promise->then(null, function ($reason) use (&$exception) {
+            $exception = $reason;
+        });
+
+        $this->assertInstanceOf('RuntimeException', $exception);
+        $this->assertEquals('Opening database cancelled', $exception->getMessage());
+    }
+
+    public function testOpenWithSocketWillRejectWhenSocketConnectionTimesOut()
+    {
+        $timer = null;
+        $loop = $this->getMockBuilder('React\EventLoop\LoopInterface')->getMock();
+        $loop->expects($this->once())->method('addTimer')->with(5.0, $this->callback(function (callable $callback) use (&$timer) {
+            $timer = $callback;
+            return true;
+        }));
+        $loop->expects($this->never())->method('cancelTimer');
+
+        $factory = new Factory($loop);
+
+        $ref = new \ReflectionProperty($factory, 'useSocket');
+        $ref->setAccessible(true);
+        $ref->setValue($factory, true);
+
+        $promise = $factory->open(':memory:');
+
+        $this->assertNotNull($timer);
+        $timer();
+
+        $exception = null;
+        $promise->then(null, function ($reason) use (&$exception) {
+            $exception = $reason;
+        });
+
+        $this->assertInstanceOf('RuntimeException', $exception);
+        $this->assertEquals('Opening database socket timed out', $exception->getMessage());
+    }
+
     protected function expectCallableNever()
     {
         $mock = $this->createCallableMock();

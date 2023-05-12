@@ -80,9 +80,9 @@ class ProcessIoDatabase extends EventEmitter implements DatabaseInterface
         foreach ($params as &$value) {
             if (\is_string($value) && \preg_match('/[\x00-\x08\x11\x12\x14-\x1f\x7f]/u', $value) !== 0) {
                 $value = ['base64' => \base64_encode($value)];
-            } elseif (\is_float($value) && \PHP_VERSION_ID < 50606) {
+            } elseif (\is_float($value) && \PHP_VERSION_ID < 50606) { // @codeCoverageIgnoreStart
                 $value = ['float' => $value];
-            }
+            } // @codeCoverageIgnoreEnd
         }
 
         return $this->send('query', array($sql, $params))->then(function ($data) {
@@ -98,9 +98,10 @@ class ProcessIoDatabase extends EventEmitter implements DatabaseInterface
                     foreach ($row as &$value) {
                         if (isset($value['base64'])) {
                             $value = \base64_decode($value['base64']);
-                        } elseif (isset($value['float'])) {
+                        } elseif (isset($value['float'])) { // @codeCoverageIgnoreStart
+                            assert(\PHP_VERSION_ID < 50606);
                             $value = (float)$value['float'];
-                        }
+                        } // @codeCoverageIgnoreEnd
                     }
                 }
             }
